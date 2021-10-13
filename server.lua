@@ -13,7 +13,7 @@ end
 
 
 function PayBills(d, h, m)
-	print("Paiement des factures en cours le serveur peut lag momentanément")
+	print("Payment of invoices in progress the server can momentarily lag")
 	CreateThread(function()
 		Wait(0)
 		MySQL.Async.fetchAll('SELECT * FROM billing', {}, function (result)
@@ -28,7 +28,7 @@ function PayBills(d, h, m)
 					if accountMoney > 0 then
 						if math.floor(accountMoney/100*Config.MaxPercentPay) >= result[i].amount then
 							xPlayer.removeAccountMoney('bank', result[i].amount)
-							TriggerClientEvent('esx:showNotification', xPlayer.source, "Vous avez payer ".. ESX.Math.GroupDigits(result[i].amount).." sur une factures passé due")
+							TriggerClientEvent('mythic_notify:client:SendAlert', xPlayer.source, { type = 'inform', text = "You have been forced to pay $".. ESX.Math.GroupDigits(result[i].amount).." on an overdue invoice"})
 							TriggerEvent('esx_addonaccount:getSharedAccount', result[i].target, function(account)
 								account.addMoney(result[i].amount)
 							end)
@@ -39,7 +39,7 @@ function PayBills(d, h, m)
 							print(xPlayer.name.." a payer "..result[i].amount.." d'une factures due a "..result[i].target)
 						else
 							xPlayer.removeAccountMoney('bank', math.floor(accountMoney/100*Config.MaxPercentPay))
-							TriggerClientEvent('esx:showNotification', xPlayer.source, "Vous avez payer ".. ESX.Math.GroupDigits(math.floor(accountMoney/100*Config.MaxPercentPay)).." sur une factures passé due")
+							TriggerClientEvent('mythic_notify:client:SendAlert', xPlayer.source, { type = 'inform', text = "You have to pay $".. ESX.Math.GroupDigits(math.floor(accountMoney/100*25)).." on an overdue invoice"})
 							TriggerEvent('esx_addonaccount:getSharedAccount', result[i].target, function(account)
 								account.addMoney(math.floor(accountMoney/100*Config.MaxPercentPay))
 							end)
@@ -48,7 +48,7 @@ function PayBills(d, h, m)
 								['@amount'] = math.floor(accountMoney/100*Config.MaxPercentPay),
 								['@id'] = result[i].id
 							})
-							print(xPlayer.name.." a payer "..(math.floor(accountMoney/100*Config.MaxPercentPay)).." d'une factures due a "..result[i].target)
+							print(xPlayer.name.." paid "..(math.floor(accountMoney/100*Config.MaxPercentPay)).." off an invoice due to "..result[i].target)
 						end
 						
 					end
@@ -73,7 +73,7 @@ function PayBills(d, h, m)
 								{
 									['@id'] = result[i].id
 								})
-								print(result[i].identifier.." a payer "..(result[i].amount).." d'une factures due a "..result[i].target)
+								print(result[i].identifier.." paid "..(result[i].amount).." off an invoice due to "..result[i].target)
 							else
 								accounts.bank = accounts.bank - math.floor(accounts.bank/100*Config.MaxPercentPay)
 								MySQL.Sync.execute('UPDATE users SET accounts = @accounts WHERE identifier = @identifier',
